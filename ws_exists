@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+## Try to get workspace id for a given ws name
+## exit 0 if workspace exists, 1 otherwise
+
+# source shared functions
+. "$(dirname "$(realpath "$0")")/common.include"
+
+ws_id=$(get_ws_id_by_name_or_not "$1")
+[ "$ws_id" == "" ] && exit 1
+exit 0

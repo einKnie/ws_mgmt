@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+## commonly used functions for workspace management
+
+scriptname="$(basename "$0")"
+
+log_journal() {
+  if which systemd-cat &>/dev/null ; then
+    echo "$@" | systemd-cat -t "$scriptname"
+  else
+    echo "$@"
+  fi
+}
+
+get_ws_id_by_name() {
+    ws_name="${1}"
+    ws_id=$(i3-msg -t get_workspaces | jq --arg nm "$ws_name" '.[] | select(.name == $nm).id')
+    echo $ws_id
+}
+
+
+get_focused_ws_id() {
+    ws_id=$(i3-msg -t get_workspaces | jq '.[] | select(.focused == true) | .id')
+    echo $ws_id
+}
+
+get_focused_ws_name() {
+    ws_name="$(i3-msg -t get_workspaces | jq '.[] | select(.focused == true) | .name')"
+    echo "$ws_name"
+}
+
+# if a name is provided, get named id, else get focused ws id
+# focused ws_name is returned as \"name\", so i need to remove the quotes {focused//\"/}
+get_ws_id_by_name_or_not() {
+    focused="$(get_focused_ws_name)"
+    ws_name="${1:-${focused//\"/}}"
+    ws_id=$(i3-msg -t get_workspaces | jq --arg nm "$ws_name" '.[] | select(.name == $nm).id')
+    echo $ws_id
+}
+
+# if an id is provided, get that ws name, else get focused ws name
+get_ws_name_by_id_or_not() {
+    focused=$(get_focused_ws_id)
+    ws_id=${1:-$focused}
+    ws_name="$(i3-msg -t get_workspaces | jq --arg wsid "$ws_id" '.[] | select(.id == ($wsid | tonumber)).name')"
+    echo "$ws_name"
+}
+
+get_ws_output() {
+    ws_output=$(i3-msg -t get_workspaces | jq --arg wsid "$1" '.[] | select(.id == ($wsid | tonumber)).output')
+    echo "$ws_output"
+}
+
+get_ws_windows() {
+    # find all windows in given workspace.
+    # '..' is the [recursive descent operator](https://stedolan.github.io/jq/manual/v1.6/#RecursiveDescent:..)
+    # "use ..|.a? to find all the values of object keys "a" in any object found "below" ."
+    ws_id=${1:-$(get_focused_ws_id)}
+    i3-msg -t get_tree |
+        jq --arg wsid "$ws_id" '.. |
+            select(.type? == "workspace" and .id? == ($wsid | tonumber)).nodes |
+            .. | select(.window?).window'
+}
+
