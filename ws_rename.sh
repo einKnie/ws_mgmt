@@ -18,16 +18,10 @@ if [ -z "$newname" ] ;then
 fi
 
 # get previous ws number, if any, and keep it
-oldnum=${sane_wsname%%[^0-9]}
+oldnum=${sane_wsname%%[^0-9]*}
 if [ -n "$oldnum" ] ;then
   newname="$oldnum $newname"
 fi
 
-echo "sane: $sane_wsname"
-echo "name: $wsname"
-echo "num: $oldnum"
-echo "new: $newname"
-exit 0
-
-log_journal "renaming $wsname to $newname"
+log_journal "renaming $wsname to \"$newname\""
 i3-msg rename workspace "$wsname" to "\"$newname\""

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -x
+
 # this script shall kill all windows on the active workspace
 # (or a provided workspace name, possibly)
 
