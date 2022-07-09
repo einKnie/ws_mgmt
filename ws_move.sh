@@ -5,6 +5,9 @@
 # - get ws's display
 # - move ws to other display
 
+# note: this works, but there's builtin i3 methods to do that as well.
+# so, it is not used.
+
 
 # source shared functions
 . "$(dirname "$(realpath "$0")")/common.include"
